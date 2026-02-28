@@ -3,27 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Trending 排行榜</title>
+    <title>GitHub Trending</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #0d1117;
             color: #c9d1d9;
-            padding: 20px;
-            line-height: 1.6;
+            padding: 16px;
+            line-height: 1.5;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 {
-            text-align: center;
-            color: #58a6ff;
-            margin-bottom: 30px;
-        }
-        .stats {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #8b949e;
-        }
+        .container { max-width: 1000px; margin: 0 auto; }
         .repo-list {
             display: flex;
             flex-direction: column;
@@ -34,27 +24,36 @@
         }
         .repo-item {
             display: grid;
-            grid-template-columns: 110px 1fr 100px 90px;
-            gap: 16px;
-            padding: 16px;
+            grid-template-columns: 110px auto 80px 70px;
+            gap: 12px;
+            padding: 14px 16px;
             background: #161b22;
-            align-items: start;
+            align-items: center;
         }
         .repo-item:hover {
             background: #21262d;
         }
+        .repo-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
         .repo-time {
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: #8b949e;
-            white-space: nowrap;
+        }
+        .repo-stars {
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #e3b341;
         }
         .repo-content {
             min-width: 0;
         }
         .repo-name {
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
         .repo-name a {
             color: #58a6ff;
@@ -65,37 +64,14 @@
         }
         .repo-desc {
             color: #8b949e;
-            font-size: 0.9em;
-            line-height: 1.5;
+            font-size: 0.85em;
+            line-height: 1.4;
             word-break: break-word;
-        }
-        .repo-stars {
-            text-align: right;
-            white-space: nowrap;
-        }
-        .stars-count {
-            display: block;
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #e3b341;
-        }
-        .stars-label {
-            font-size: 0.75em;
-            color: #8b949e;
         }
         .repo-today {
             text-align: right;
-            white-space: nowrap;
-        }
-        .today-count {
-            display: block;
-            font-size: 1.1em;
             font-weight: 600;
             color: #3fb950;
-        }
-        .today-label {
-            font-size: 0.75em;
-            color: #8b949e;
         }
         .loading {
             text-align: center;
@@ -106,10 +82,10 @@
         }
         @media (max-width: 768px) {
             .repo-item {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr auto;
                 gap: 8px;
             }
-            .repo-stars, .repo-today {
+            .repo-today {
                 text-align: left;
             }
         }
@@ -117,8 +93,6 @@
 </head>
 <body>
     <div class="container">
-        <h1>GitHub Trending 排行榜</h1>
-        <div class="stats" id="stats">加载中...</div>
         <div class="repo-list" id="repoList">
             <div class="loading">加载中...</div>
         </div>
@@ -130,32 +104,24 @@
                 const response = await fetch('datas/latest.json');
                 const data = await response.json();
                 
-                document.getElementById('stats').textContent = 
-                    `共 ${data.count} 条记录，按采集时间最新排序`;
-                
                 const repoList = document.getElementById('repoList');
-                repoList.innerHTML = data.projects.map((p, i) => `
+                repoList.innerHTML = data.projects.map(p => `
                     <div class="repo-item">
-                        <div class="repo-time">${formatTime(p.fetched_at)}</div>
+                        <div class="repo-meta">
+                            <div class="repo-time">${formatTime(p.fetched_at)}</div>
+                            <div class="repo-stars">${p.stars.toLocaleString()}</div>
+                        </div>
                         <div class="repo-content">
                             <div class="repo-name">
                                 <a href="${p.url}" target="_blank">${p.name}</a>
                             </div>
                             <div class="repo-desc">${escapeHtml(p.description || '-')}</div>
                         </div>
-                        <div class="repo-stars">
-                            <span class="stars-count">${p.stars.toLocaleString()}</span>
-                            <span class="stars-label">stars</span>
-                        </div>
-                        <div class="repo-today">
-                            <span class="today-count">+${p.today_stars.toLocaleString()}</span>
-                            <span class="today-label">today</span>
-                        </div>
+                        <div class="repo-today">+${p.today_stars.toLocaleString()}</div>
                     </div>
                 `).join('');
             } catch (e) {
-                document.getElementById('repoList').innerHTML = 
-                    '<div class="loading">加载失败，请稍后重试</div>';
+                document.getElementById('repoList').innerHTML = '<div class="loading">加载失败</div>';
                 console.error(e);
             }
         }
