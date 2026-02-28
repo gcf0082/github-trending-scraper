@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from github_trending import fetch_trending
+from scraper import fetch_trending
 
 
 def main():

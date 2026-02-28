@@ -11,13 +11,13 @@ pip install -r requirements.txt
 ## Usage
 
 ```python
-from github_trending import fetch_trending
+from scraper import fetch_trending
 
 # Get daily trending projects
 projects = fetch_trending()
 
 # Or use the class directly
-from github_trending import GitHubTrendingScraper
+from scraper import GitHubTrendingScraper
 scraper = GitHubTrendingScraper(language="python", since="daily")
 projects = scraper.fetch()
 ```
