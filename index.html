@@ -13,7 +13,7 @@
             padding: 20px;
             line-height: 1.6;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; }
         h1 {
             text-align: center;
             color: #58a6ff;
@@ -24,83 +24,94 @@
             margin-bottom: 20px;
             color: #8b949e;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #161b22;
+        .repo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: #30363d;
             border-radius: 8px;
             overflow: hidden;
         }
-        th, td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid #30363d;
-            vertical-align: middle;
+        .repo-item {
+            display: grid;
+            grid-template-columns: 110px 1fr 100px 90px;
+            gap: 16px;
+            padding: 16px;
+            background: #161b22;
+            align-items: start;
         }
-        th {
+        .repo-item:hover {
             background: #21262d;
-            color: #58a6ff;
-            font-weight: 600;
-            font-size: 0.85em;
         }
-        tr:hover { background: #21262d; }
-        a {
+        .repo-time {
+            font-size: 0.85em;
+            color: #8b949e;
+            white-space: nowrap;
+        }
+        .repo-content {
+            min-width: 0;
+        }
+        .repo-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .repo-name a {
             color: #58a6ff;
             text-decoration: none;
         }
-        a:hover { text-decoration: underline; }
-        .rank {
-            color: #f85149;
-            font-weight: bold;
-            width: 45px;
+        .repo-name a:hover {
+            text-decoration: underline;
         }
-        .time {
-            width: 110px;
-            font-size: 0.85em;
-            color: #8b949e;
-            white-space: nowrap;
-        }
-        .stars, .forks {
+        .repo-desc {
             color: #8b949e;
             font-size: 0.9em;
-            white-space: nowrap;
-        }
-        .today-stars {
-            color: #3fb950;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        .lang {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            background: #238636;
-            color: white;
-            white-space: nowrap;
-        }
-        .desc {
-            max-width: 400px;
-            color: #8b949e;
-            font-size: 0.85em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .desc:hover {
-            white-space: normal;
+            line-height: 1.5;
             word-break: break-word;
         }
-        .name {
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .repo-stars {
+            text-align: right;
             white-space: nowrap;
+        }
+        .stars-count {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #e3b341;
+        }
+        .stars-label {
+            font-size: 0.75em;
+            color: #8b949e;
+        }
+        .repo-today {
+            text-align: right;
+            white-space: nowrap;
+        }
+        .today-count {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #3fb950;
+        }
+        .today-label {
+            font-size: 0.75em;
+            color: #8b949e;
         }
         .loading {
             text-align: center;
             padding: 40px;
             color: #8b949e;
+            background: #161b22;
+            border-radius: 8px;
+        }
+        @media (max-width: 768px) {
+            .repo-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .repo-stars, .repo-today {
+                text-align: left;
+            }
         }
     </style>
 </head>
@@ -108,23 +119,9 @@
     <div class="container">
         <h1>GitHub Trending 排行榜</h1>
         <div class="stats" id="stats">加载中...</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>采集时间</th>
-                    <th>#</th>
-                    <th>项目</th>
-                    <th>描述</th>
-                    <th>语言</th>
-                    <th>⭐ Stars</th>
-                    <th>🍴 Forks</th>
-                    <th>今日</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr><td colspan="8" class="loading">加载中...</td></tr>
-            </tbody>
-        </table>
+        <div class="repo-list" id="repoList">
+            <div class="loading">加载中...</div>
+        </div>
     </div>
 
     <script>
@@ -136,22 +133,29 @@
                 document.getElementById('stats').textContent = 
                     `共 ${data.count} 条记录，按采集时间最新排序`;
                 
-                const tbody = document.getElementById('tableBody');
-                tbody.innerHTML = data.projects.map((p, i) => `
-                    <tr>
-                        <td class="time">${formatTime(p.fetched_at)}</td>
-                        <td class="rank">${i + 1}</td>
-                        <td class="name"><a href="${p.url}" target="_blank">${p.name}</a></td>
-                        <td class="desc" title="${escapeHtml(p.description || '')}">${p.description || '-'}</td>
-                        <td>${p.language ? `<span class="lang">${p.language}</span>` : '-'}</td>
-                        <td class="stars">${p.stars.toLocaleString()}</td>
-                        <td class="forks">${p.forks.toLocaleString()}</td>
-                        <td class="today-stars">+${p.today_stars.toLocaleString()}</td>
-                    </tr>
+                const repoList = document.getElementById('repoList');
+                repoList.innerHTML = data.projects.map((p, i) => `
+                    <div class="repo-item">
+                        <div class="repo-time">${formatTime(p.fetched_at)}</div>
+                        <div class="repo-content">
+                            <div class="repo-name">
+                                <a href="${p.url}" target="_blank">${p.name}</a>
+                            </div>
+                            <div class="repo-desc">${escapeHtml(p.description || '-')}</div>
+                        </div>
+                        <div class="repo-stars">
+                            <span class="stars-count">${p.stars.toLocaleString()}</span>
+                            <span class="stars-label">stars</span>
+                        </div>
+                        <div class="repo-today">
+                            <span class="today-count">+${p.today_stars.toLocaleString()}</span>
+                            <span class="today-label">today</span>
+                        </div>
+                    </div>
                 `).join('');
             } catch (e) {
-                document.getElementById('tableBody').innerHTML = 
-                    '<tr><td colspan="8" class="loading">加载失败，请稍后重试</td></tr>';
+                document.getElementById('repoList').innerHTML = 
+                    '<div class="loading">加载失败，请稍后重试</div>';
                 console.error(e);
             }
         }
