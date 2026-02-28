@@ -13,7 +13,7 @@
             padding: 20px;
             line-height: 1.6;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         h1 {
             text-align: center;
             color: #58a6ff;
@@ -32,14 +32,16 @@
             overflow: hidden;
         }
         th, td {
-            padding: 12px;
+            padding: 10px 12px;
             text-align: left;
             border-bottom: 1px solid #30363d;
+            vertical-align: middle;
         }
         th {
             background: #21262d;
             color: #58a6ff;
             font-weight: 600;
+            font-size: 0.85em;
         }
         tr:hover { background: #21262d; }
         a {
@@ -50,32 +52,50 @@
         .rank {
             color: #f85149;
             font-weight: bold;
-            width: 50px;
+            width: 45px;
+        }
+        .time {
+            width: 110px;
+            font-size: 0.85em;
+            color: #8b949e;
+            white-space: nowrap;
         }
         .stars, .forks {
             color: #8b949e;
             font-size: 0.9em;
+            white-space: nowrap;
         }
         .today-stars {
             color: #3fb950;
             font-weight: bold;
+            white-space: nowrap;
         }
         .lang {
             display: inline-block;
             padding: 2px 8px;
             border-radius: 12px;
-            font-size: 0.8em;
+            font-size: 0.75em;
             background: #238636;
             color: white;
+            white-space: nowrap;
         }
         .desc {
-            max-width: 300px;
+            max-width: 400px;
             color: #8b949e;
-            font-size: 0.9em;
+            font-size: 0.85em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        .time {
-            font-size: 0.8em;
-            color: #8b949e;
+        .desc:hover {
+            white-space: normal;
+            word-break: break-word;
+        }
+        .name {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .loading {
             text-align: center;
@@ -91,6 +111,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>采集时间</th>
                     <th>#</th>
                     <th>项目</th>
                     <th>描述</th>
@@ -98,7 +119,6 @@
                     <th>⭐ Stars</th>
                     <th>🍴 Forks</th>
                     <th>今日</th>
-                    <th>采集时间</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -119,14 +139,14 @@
                 const tbody = document.getElementById('tableBody');
                 tbody.innerHTML = data.projects.map((p, i) => `
                     <tr>
+                        <td class="time">${formatTime(p.fetched_at)}</td>
                         <td class="rank">${i + 1}</td>
-                        <td><a href="${p.url}" target="_blank">${p.name}</a></td>
-                        <td class="desc" title="${p.description || ''}">${p.description || '-'}</td>
+                        <td class="name"><a href="${p.url}" target="_blank">${p.name}</a></td>
+                        <td class="desc" title="${escapeHtml(p.description || '')}">${p.description || '-'}</td>
                         <td>${p.language ? `<span class="lang">${p.language}</span>` : '-'}</td>
                         <td class="stars">${p.stars.toLocaleString()}</td>
                         <td class="forks">${p.forks.toLocaleString()}</td>
                         <td class="today-stars">+${p.today_stars.toLocaleString()}</td>
-                        <td class="time">${formatTime(p.fetched_at)}</td>
                     </tr>
                 `).join('');
             } catch (e) {
@@ -145,6 +165,12 @@
                 hour: '2-digit', 
                 minute: '2-digit' 
             });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         loadData();
