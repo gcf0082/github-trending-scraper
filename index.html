@@ -13,7 +13,7 @@
             padding: 16px;
             line-height: 1.5;
         }
-        .container { max-width: 1000px; margin: 0 auto; }
+        .container { max-width: 900px; margin: 0 auto; }
         .repo-list {
             display: flex;
             flex-direction: column;
@@ -24,32 +24,47 @@
         }
         .repo-item {
             display: grid;
-            grid-template-columns: 110px auto 80px 30px;
+            grid-template-columns: 100px 1fr;
             gap: 12px;
             padding: 14px 16px;
             background: #161b22;
-            align-items: center;
         }
         .repo-item:hover {
             background: #21262d;
         }
-        .repo-meta {
+        .repo-left {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 4px;
         }
         .repo-time {
             font-size: 0.8em;
             color: #8b949e;
         }
         .repo-stars {
-            font-size: 0.95em;
+            font-size: 1em;
             font-weight: 600;
             color: #e3b341;
         }
-        .repo-content {
-            min-width: 0;
+        .repo-today {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #3fb950;
+        }
+        .repo-btn {
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            cursor: pointer;
+            padding: 2px 0;
+            font-size: 0.8em;
             text-align: left;
+        }
+        .repo-btn:hover {
+            color: #c9d1d9;
+        }
+        .repo-right {
+            min-width: 0;
         }
         .repo-name {
             font-size: 1em;
@@ -72,32 +87,13 @@
             line-height: 1.4;
             word-break: break-word;
         }
-        .repo-today {
-            text-align: right;
-            font-weight: 600;
-            color: #3fb950;
-        }
-        .repo-btn {
-            background: transparent;
-            border: 1px solid #30363d;
-            color: #8b949e;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-        }
-        .repo-btn:hover {
-            background: #30363d;
-            color: #c9d1d9;
-        }
         .repo-details {
             display: none;
-            grid-column: 1 / -1;
             background: #0d1117;
-            padding: 12px;
+            padding: 10px;
             margin-top: 8px;
             border-radius: 6px;
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: #8b949e;
         }
         .repo-details.show {
@@ -105,7 +101,7 @@
         }
         .repo-details-row {
             display: flex;
-            gap: 24px;
+            gap: 20px;
             flex-wrap: wrap;
         }
         .repo-details-row span {
@@ -117,11 +113,6 @@
             color: #8b949e;
             background: #161b22;
             border-radius: 8px;
-        }
-        @media (max-width: 768px) {
-            .repo-item {
-                grid-template-columns: 1fr auto auto;
-            }
         }
     </style>
 </head>
@@ -141,24 +132,24 @@
                 const repoList = document.getElementById('repoList');
                 repoList.innerHTML = data.projects.map((p, i) => `
                     <div class="repo-item">
-                        <div class="repo-meta">
+                        <div class="repo-left">
                             <div class="repo-time">${formatTime(p.fetched_at)}</div>
                             <div class="repo-stars">${p.stars.toLocaleString()}</div>
+                            <div class="repo-today">+${p.today_stars.toLocaleString()}</div>
+                            <button class="repo-btn" onclick="toggleDetails(${i})">详情</button>
                         </div>
-                        <div class="repo-content">
+                        <div class="repo-right">
                             <div class="repo-name">
                                 <a href="${p.url}" target="_blank">${p.name}</a>
                             </div>
                             <div class="repo-desc">${escapeHtml(p.description || '-')}</div>
-                        </div>
-                        <div class="repo-today">+${p.today_stars.toLocaleString()}</div>
-                        <button class="repo-btn" onclick="toggleDetails(${i})">···</button>
-                        <div class="repo-details" id="details-${i}">
-                            <div class="repo-details-row">
-                                <div>创建时间: <span>${formatDate(p.created_at)}</span></div>
-                                <div>更新时间: <span>${formatDate(p.updated_at)}</span></div>
-                                <div>Forks: <span>${p.forks.toLocaleString()}</span></div>
-                                <div>语言: <span>${p.language || '-'}</span></div>
+                            <div class="repo-details" id="details-${i}">
+                                <div class="repo-details-row">
+                                    <span>创建: ${formatDate(p.created_at)}</span>
+                                    <span>更新: ${formatDate(p.updated_at)}</span>
+                                    <span>Fork: ${p.forks.toLocaleString()}</span>
+                                    <span>语言: ${p.language || '-'}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
