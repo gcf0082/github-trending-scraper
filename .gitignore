@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
+*.db
 *.json
+!/datas/*.json
+!/index.html

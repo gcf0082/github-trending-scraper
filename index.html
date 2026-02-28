@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Trending 排行榜</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            text-align: center;
+            color: #58a6ff;
+            margin-bottom: 30px;
+        }
+        .stats {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #8b949e;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #161b22;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #30363d;
+        }
+        th {
+            background: #21262d;
+            color: #58a6ff;
+            font-weight: 600;
+        }
+        tr:hover { background: #21262d; }
+        a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        a:hover { text-decoration: underline; }
+        .rank {
+            color: #f85149;
+            font-weight: bold;
+            width: 50px;
+        }
+        .stars, .forks {
+            color: #8b949e;
+            font-size: 0.9em;
+        }
+        .today-stars {
+            color: #3fb950;
+            font-weight: bold;
+        }
+        .lang {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            background: #238636;
+            color: white;
+        }
+        .desc {
+            max-width: 300px;
+            color: #8b949e;
+            font-size: 0.9em;
+        }
+        .time {
+            font-size: 0.8em;
+            color: #8b949e;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GitHub Trending 排行榜</h1>
+        <div class="stats" id="stats">加载中...</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>项目</th>
+                    <th>描述</th>
+                    <th>语言</th>
+                    <th>⭐ Stars</th>
+                    <th>🍴 Forks</th>
+                    <th>今日</th>
+                    <th>采集时间</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="8" class="loading">加载中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                const response = await fetch('datas/latest.json');
+                const data = await response.json();
+                
+                document.getElementById('stats').textContent = 
+                    `共 ${data.count} 条记录，按采集时间最新排序`;
+                
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = data.projects.map((p, i) => `
+                    <tr>
+                        <td class="rank">${i + 1}</td>
+                        <td><a href="${p.url}" target="_blank">${p.name}</a></td>
+                        <td class="desc" title="${p.description || ''}">${p.description || '-'}</td>
+                        <td>${p.language ? `<span class="lang">${p.language}</span>` : '-'}</td>
+                        <td class="stars">${p.stars.toLocaleString()}</td>
+                        <td class="forks">${p.forks.toLocaleString()}</td>
+                        <td class="today-stars">+${p.today_stars.toLocaleString()}</td>
+                        <td class="time">${formatTime(p.fetched_at)}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                document.getElementById('tableBody').innerHTML = 
+                    '<tr><td colspan="8" class="loading">加载失败，请稍后重试</td></tr>';
+                console.error(e);
+            }
+        }
+
+        function formatTime(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            return date.toLocaleString('zh-CN', { 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
