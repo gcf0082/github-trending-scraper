@@ -14,6 +14,9 @@ class TrendingProject:
     forks: int
     today_stars: int
     url: str
+    category: str = ""
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
 
 class GitHubTrendingScraper:
@@ -114,11 +117,33 @@ class GitHubTrendingScraper:
                 stars=stars,
                 forks=forks,
                 today_stars=today_stars,
-                url=url
+                url=url,
+                category=self.since,
+                created_at=None,
+                updated_at=None
             )
         except Exception as e:
             print(f"Error parsing article: {e}")
             return None
+
+    def _fetch_repo_details(self, repo_path: str) -> tuple:
+        try:
+            api_url = f"https://api.github.com/repos/{repo_path}"
+            response = requests.get(api_url, headers=self.headers, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                return data.get("created_at"), data.get("updated_at")
+        except Exception:
+            pass
+        return None, None
+
+    def fetch_with_details(self) -> List[TrendingProject]:
+        projects = self.fetch()
+        for p in projects:
+            created, updated = self._fetch_repo_details(p.name)
+            p.created_at = created
+            p.updated_at = updated
+        return projects
 
     def _parse_number(self, text: str) -> int:
         text = text.replace(",", "").strip()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json
 from datetime import datetime
-from scraper import fetch_trending
+from scraper import GitHubTrendingScraper
 
 
 def save_to_json(all_projects, filename):
@@ -24,7 +24,8 @@ def main():
 
     for since in categories:
         print(f"Fetching {category_names[since]}...")
-        projects = fetch_trending(since=since)
+        scraper = GitHubTrendingScraper(since=since)
+        projects = scraper.fetch_with_details()
         
         for p in projects:
             if p.name not in seen:
@@ -36,7 +37,9 @@ def main():
                     "stars": p.stars,
                     "forks": p.forks,
                     "today_stars": p.today_stars,
-                    "url": p.url
+                    "url": p.url,
+                    "created_at": p.created_at,
+                    "updated_at": p.updated_at
                 })
 
     save_to_json(all_projects, "github_trending.json")
