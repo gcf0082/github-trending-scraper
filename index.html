@@ -24,7 +24,7 @@
         }
         .repo-item {
             display: grid;
-            grid-template-columns: 110px auto 80px 70px;
+            grid-template-columns: 110px auto 80px 30px;
             gap: 12px;
             padding: 14px 16px;
             background: #161b22;
@@ -77,6 +77,40 @@
             font-weight: 600;
             color: #3fb950;
         }
+        .repo-btn {
+            background: transparent;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        .repo-btn:hover {
+            background: #30363d;
+            color: #c9d1d9;
+        }
+        .repo-details {
+            display: none;
+            grid-column: 1 / -1;
+            background: #0d1117;
+            padding: 12px;
+            margin-top: 8px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #8b949e;
+        }
+        .repo-details.show {
+            display: block;
+        }
+        .repo-details-row {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .repo-details-row span {
+            color: #c9d1d9;
+        }
         .loading {
             text-align: center;
             padding: 40px;
@@ -86,11 +120,7 @@
         }
         @media (max-width: 768px) {
             .repo-item {
-                grid-template-columns: 1fr auto;
-                gap: 8px;
-            }
-            .repo-today {
-                text-align: left;
+                grid-template-columns: 1fr auto auto;
             }
         }
     </style>
@@ -109,7 +139,7 @@
                 const data = await response.json();
                 
                 const repoList = document.getElementById('repoList');
-                repoList.innerHTML = data.projects.map(p => `
+                repoList.innerHTML = data.projects.map((p, i) => `
                     <div class="repo-item">
                         <div class="repo-meta">
                             <div class="repo-time">${formatTime(p.fetched_at)}</div>
@@ -122,12 +152,26 @@
                             <div class="repo-desc">${escapeHtml(p.description || '-')}</div>
                         </div>
                         <div class="repo-today">+${p.today_stars.toLocaleString()}</div>
+                        <button class="repo-btn" onclick="toggleDetails(${i})">···</button>
+                        <div class="repo-details" id="details-${i}">
+                            <div class="repo-details-row">
+                                <div>创建时间: <span>${formatDate(p.created_at)}</span></div>
+                                <div>更新时间: <span>${formatDate(p.updated_at)}</span></div>
+                                <div>Forks: <span>${p.forks.toLocaleString()}</span></div>
+                                <div>语言: <span>${p.language || '-'}</span></div>
+                            </div>
+                        </div>
                     </div>
                 `).join('');
             } catch (e) {
                 document.getElementById('repoList').innerHTML = '<div class="loading">加载失败</div>';
                 console.error(e);
             }
+        }
+
+        function toggleDetails(i) {
+            const details = document.getElementById(`details-${i}`);
+            details.classList.toggle('show');
         }
 
         function formatTime(isoString) {
@@ -139,6 +183,11 @@
                 hour: '2-digit', 
                 minute: '2-digit' 
             });
+        }
+
+        function formatDate(isoString) {
+            if (!isoString) return '-';
+            return isoString.replace('T', ' ').replace('Z', '');
         }
 
         function escapeHtml(text) {
