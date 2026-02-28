@@ -28,11 +28,13 @@ def main():
         projects = scraper.fetch_with_details()
         
         for p in projects:
-            if p.name not in seen:
-                seen.add(p.name)
+            name = p.name.strip() if p.name else ""
+            description = p.description.strip() if p.description else ""
+            if name and name not in seen:
+                seen.add(name)
                 all_projects.append({
-                    "name": p.name,
-                    "description": p.description,
+                    "name": name,
+                    "description": description,
                     "language": p.language,
                     "stars": p.stars,
                     "forks": p.forks,
